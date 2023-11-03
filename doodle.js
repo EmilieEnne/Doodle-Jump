@@ -15,6 +15,12 @@ let doodlerLeftImg;
 //physics
 let velocityX = 0;
 
+//platforms
+let platformArray = [];
+let platformWidth = 60;
+let platformHeight = 18;
+let platformImg;
+
 let doodler = {
   img: null,
   x: doodlerX,
@@ -50,6 +56,11 @@ window.onload = function () {
   doodlerLeftImg = new Image();
   doodlerLeftImg.src = "./doodler-left.png";
 
+  platformImg = new Image();
+  platformImg.src = "./platform.png";
+
+ placePlatforms();
+
   requestAnimationFrame(update);
   document.addEventListener("keydown", moveDoodler);
 };
@@ -58,6 +69,11 @@ function update() {
   requestAnimationFrame(update);
   context.clearRect(0, 0, board.width, board.height);
   doodler.x += velocityX;
+  if (doodler.x > boardWidth) {
+    doodler.x = 0;
+  } else if (doodler.x + doodler.width < 0) {
+    doodler.x = boardWidth;
+  }
   context.drawImage(
     doodler.img,
     doodler.x,
@@ -75,4 +91,19 @@ function moveDoodler(e) {
     velocityX = -4;
     doodler.img = doodlerLeftImg;
   }
+}
+
+function placePlatforms() {
+ platformArray = [];
+ //starting platforms 
+
+ let platform = {
+  img : platformImg,
+  x : boardWidth/2,
+  y : boardHeight -50,
+  width : platformWidth
+  height : platformHeight 
+ }
+
+ platformArray.push(platform);
 }
