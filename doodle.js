@@ -14,6 +14,9 @@ let doodlerLeftImg;
 
 //physics
 let velocityX = 0;
+let velocityY = 0;
+let initalVelocityY = -8;
+let gravity = 0.4;
 
 //platforms
 let platformArray = [];
@@ -59,7 +62,8 @@ window.onload = function () {
   platformImg = new Image();
   platformImg.src = "./platform.png";
 
- placePlatforms();
+  velocityY = initalVelocityY;
+  placePlatforms();
 
   requestAnimationFrame(update);
   document.addEventListener("keydown", moveDoodler);
@@ -74,6 +78,9 @@ function update() {
   } else if (doodler.x + doodler.width < 0) {
     doodler.x = boardWidth;
   }
+
+  velocityY += gravity;
+  doodler.y += velocityY;
   context.drawImage(
     doodler.img,
     doodler.x,
@@ -81,6 +88,29 @@ function update() {
     doodler.width,
     doodler.height
   );
+
+  //platforms
+  for (let i = 0; i < platformArray.length; i++) {
+    let platform = platformArray[i];
+    if (velocityY < 0 && doodler.y < (boardHeight * 3) / 4) {
+      platform.y -= initalVelocityY;
+    }
+    if (detectCollision(doodler, platform) && velocityY >= 0) {
+      velocityY = initalVelocityY;
+    }
+    context.drawImage(
+      platform.img,
+      platform.x,
+      platform.y,
+      platform.width,
+      platform.height
+    );
+  }
+
+  while (platformArray.length > 0 && platformArray[0].y >= boardHeight) {
+    platformArray.shift();
+    newPlatform();
+  }
 }
 
 function moveDoodler(e) {
@@ -94,16 +124,61 @@ function moveDoodler(e) {
 }
 
 function placePlatforms() {
- platformArray = [];
- //starting platforms 
+  platformArray = [];
+  //starting platforms
 
- let platform = {
-  img : platformImg,
-  x : boardWidth/2,
-  y : boardHeight -50,
-  width : platformWidth
-  height : platformHeight 
- }
+  let platform = {
+    img: platformImg,
+    x: boardWidth / 2,
+    y: boardHeight - 50,
+    width: platformWidth,
+    height: platformHeight,
+  };
 
- platformArray.push(platform);
+  platformArray.push(platform);
+
+  //platform = {
+  //img: platformImg,
+  //x: boardWidth / 2,
+  //y: boardHeight - 150,
+  //width: platformWidth,
+  //height: platformHeight,
+  //};
+
+  //platformArray.push(platform);
+
+  for (let i = 0; i < 6; i++) {
+    let randomX = Math.floor((Math.random() * boardWidth * 3) / 4);
+    let platform = {
+      img: platformImg,
+      x: randomX,
+      y: boardHeight - 75 * i - 150,
+      width: platformWidth,
+      height: platformHeight,
+    };
+
+    platformArray.push(platform);
+  }
+}
+
+function newPlatform() {
+  let randomX = Math.floor((Math.random() * boardWidth * 3) / 4);
+  let platform = {
+    img: platformImg,
+    x: randomX,
+    y: -platformHeight,
+    width: platformWidth,
+    height: platformHeight,
+  };
+
+  platformArray.push(platform);
+}
+
+function detectCollision(a, b) {
+  return (
+    a.x < b.x + b.width &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.height &&
+    a.y + a.height > b.y
+  );
 }
